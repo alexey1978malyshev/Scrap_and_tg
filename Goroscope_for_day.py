@@ -2,6 +2,7 @@ import requests
 import lxml
 from bs4 import BeautifulSoup as b
 import telebot
+from telebot import types
 import time
 import schedule
 from datetime import datetime
@@ -10,19 +11,21 @@ from threading import Thread
 URL = 'https://maykop.retrofm.ru/'
 API_KEY = '6044839241:AAG9Xp704t2E73B79jPprVap-Fq_t6vt5T4'
 
+
 # session = requests.Session()                      вариант постоянного соединения
 # adapter = requests.adapters.HTTPAdapter(
 #     pool_connections=100,
 #     pool_maxsize=100)
 # session.mount('http://', adapter)
 # count = session.params
-#r = requests.get(URL)
-#soup = b(r.text, 'lxml')
+# r = requests.get(URL)
+# soup = b(r.text, 'lxml')
 
 def request_url(url):
-    request = requests.get(URL)      # запрос содержимого страницы сайта
-    soup = b(request.text, 'lxml')   # создание объекта bs4
+    request = requests.get(URL)  # запрос содержимого страницы сайта
+    soup = b(request.text, 'lxml')  # создание объекта bs4
     return soup
+
 
 soup = request_url(URL)
 
@@ -43,32 +46,60 @@ date = time.strftime("%d %B")
 
 @bot.message_handler(commands=['start'])
 def hello(message):
-    bot.send_message(message.chat.id, 'Привет! Чтобы получить гороскоп введи свой знак зодиака:')
+    bot.send_message(message.chat.id, 'Привет! Чтобы получить гороскоп нажми на свой знак зодиака: ',
+                     reply_markup=create_keys())
 
 
 @bot.message_handler(content_types=['text'])
 def get_goroscope(message):
+
     bot.send_message(message.chat.id, f'Гороскоп на {time.strftime("%d %B")}: ')
     znak = {
-        'овен': zodiac_info_list[0],
-        'телец': zodiac_info_list[1],
-        'близнецы': zodiac_info_list[2],
-        'рак': zodiac_info_list[3],
-        'лев': zodiac_info_list[4],
-        'дева': zodiac_info_list[5],
-        'весы': zodiac_info_list[6],
-        'скорпион': zodiac_info_list[7],
-        'стрелец': zodiac_info_list[8],
-        'козерог': zodiac_info_list[9],
-        'водолей': zodiac_info_list[10],
-        'рыбы': zodiac_info_list[11]
+        '♈ Овен': zodiac_info_list[0],
+        '♉ Телец': zodiac_info_list[1],
+        '♊ Близнецы': zodiac_info_list[2],
+        '♋ Рак': zodiac_info_list[3],
+        '♌ Лев': zodiac_info_list[4],
+        '♍ Дева': zodiac_info_list[5],
+        '♎ Весы': zodiac_info_list[6],
+        '♏ Скорпион': zodiac_info_list[7],
+        '♐ Стрелец': zodiac_info_list[8],
+        '♑ Козерог': zodiac_info_list[9],
+        '♒ Водолей': zodiac_info_list[10],
+        '♓ Рыбы': zodiac_info_list[11]
     }
-    input_message = message.text.lower()
-    if input_message in znak.keys():
-        bot.send_message(message.chat.id, znak[message.text.lower()])
+    # input_message = message.text.lower()
 
-    else:
-        bot.send_message(message.chat.id, "Извините. Такого знака астрологи пока не придумали, но идея хороша...")
+    try:
+        bot.send_message(message.chat.id, znak[message.text], reply_markup=create_keys())
+        who_was = bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id)
+        print(datetime.now())
+        print(message.text)
+        print(f"id: {who_was.user.id} ---- имя: {who_was.user.first_name} ---- никнейм: {who_was.user.username}")
+    except:
+        bot.send_message(message.chat.id, """Ууупс... что то пошло не так... во всем виноваты иллюминаты и бури на 
+        солнце... не нажать ли /start ?\n
+        ... или кнопку со своим знаком зодиака...""")
+        print('ex: ' + message.text)
+
+
+def create_keys():
+    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+    btn1 = types.KeyboardButton('♈ Овен')
+    btn2 = types.KeyboardButton('♉ Телец')
+    btn3 = types.KeyboardButton('♊ Близнецы')
+    btn4 = types.KeyboardButton('♋ Рак')
+    btn5 = types.KeyboardButton('♌ Лев')
+    btn6 = types.KeyboardButton('♍ Дева')
+    btn7 = types.KeyboardButton('♎ Весы')
+    btn8 = types.KeyboardButton('♏ Скорпион')
+    btn9 = types.KeyboardButton('♐ Стрелец')
+    btn10 = types.KeyboardButton('♑ Козерог')
+    btn11 = types.KeyboardButton('♒ Водолей')
+    btn12 = types.KeyboardButton('♓ Рыбы')
+    markup.add(btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btn10, btn11, btn12)
+    znak
+    return markup
 
 
 # запуск функции по расписанию
@@ -79,6 +110,6 @@ def starter():
 
 
 if __name__ == '__main__':
-    t2 = threading.Thread(target=starter)  # запуск ф-ии starter в отдельном потоке
-    t2.start()
-    bot.polling()
+    # t2 = threading.Thread(target=starter)  # запуск ф-ии starter в отдельном потоке
+    # t2.start()
+    bot.polling(non_stop=True)
