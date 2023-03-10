@@ -23,11 +23,12 @@ API_KEY = '6044839241:AAG9Xp704t2E73B79jPprVap-Fq_t6vt5T4'
 
 def request_url(url):
     request = requests.get(URL)  # запрос содержимого страницы сайта
+    global soup
     soup = b(request.text, 'lxml')  # создание объекта bs4
     return soup
 
-
-soup = request_url(URL)
+request_url(URL)
+#soup = request_url(URL)
 
 all_zodiac_info = soup.find(class_="index_horoscope_list").find_all('div')
 zodiac_info_list = []
@@ -77,8 +78,8 @@ def get_goroscope(message):
         print(datetime.now())
         print(message.text)
         print(f"id: {who_was.user.id} ---- имя: {who_was.user.first_name} ---- никнейм: {who_was.user.username}")
-    except:
 
+    except:
         bot.send_message(message.chat.id, f"""Ууупс... что то пошло не так... во всем виноваты иллюминаты и бури на 
         солнце... не нажать ли <b>/start </b>?
         
