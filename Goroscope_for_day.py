@@ -31,6 +31,8 @@ soup = request_url(URL)
 
 all_zodiac_info = soup.find(class_="index_horoscope_list").find_all('div')
 zodiac_info_list = []
+znak = {}
+
 for item in all_zodiac_info:
     zodiac_info_list.append(item.text)
 
@@ -52,7 +54,6 @@ def hello(message):
 
 @bot.message_handler(content_types=['text'])
 def get_goroscope(message):
-
     bot.send_message(message.chat.id, f'Гороскоп на {time.strftime("%d %B")}: ')
     znak = {
         '♈ Овен': zodiac_info_list[0],
@@ -77,28 +78,19 @@ def get_goroscope(message):
         print(message.text)
         print(f"id: {who_was.user.id} ---- имя: {who_was.user.first_name} ---- никнейм: {who_was.user.username}")
     except:
-        bot.send_message(message.chat.id, """Ууупс... что то пошло не так... во всем виноваты иллюминаты и бури на 
-        солнце... не нажать ли /start ?\n
-        ... или кнопку со своим знаком зодиака...""")
-        print('ex: ' + message.text)
+
+        bot.send_message(message.chat.id, f"""Ууупс... что то пошло не так... во всем виноваты иллюминаты и бури на 
+        солнце... не нажать ли <b>/start </b>?
+        
+                  ... <b>или кнопку со своим знаком зодиака</b>...""", parse_mode='html')
+        print('---------------\nex: ' + message.text + '\n---------------')
 
 
 def create_keys():
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    btn1 = types.KeyboardButton('♈ Овен')
-    btn2 = types.KeyboardButton('♉ Телец')
-    btn3 = types.KeyboardButton('♊ Близнецы')
-    btn4 = types.KeyboardButton('♋ Рак')
-    btn5 = types.KeyboardButton('♌ Лев')
-    btn6 = types.KeyboardButton('♍ Дева')
-    btn7 = types.KeyboardButton('♎ Весы')
-    btn8 = types.KeyboardButton('♏ Скорпион')
-    btn9 = types.KeyboardButton('♐ Стрелец')
-    btn10 = types.KeyboardButton('♑ Козерог')
-    btn11 = types.KeyboardButton('♒ Водолей')
-    btn12 = types.KeyboardButton('♓ Рыбы')
-    markup.add(btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btn10, btn11, btn12)
-    znak
+    for z in znak:
+        btn = types.KeyboardButton(znak.keys())
+        markup.add(btn)
     return markup
 
 
