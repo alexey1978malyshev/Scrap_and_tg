@@ -6,6 +6,7 @@ from telebot import types
 import time
 import schedule
 from datetime import datetime
+import threading
 from threading import Thread
 
 URL = 'https://maykop.retrofm.ru/'
@@ -27,8 +28,8 @@ def request_url(url):
     soup = b(request.text, 'lxml')  # создание объекта bs4
     return soup
 
+
 request_url(URL)
-#soup = request_url(URL)
 
 all_zodiac_info = soup.find(class_="index_horoscope_list").find_all('div')
 zodiac_info_list = []
@@ -45,6 +46,27 @@ for item in all_zodiac_info:
 
 bot = telebot.TeleBot(API_KEY)
 date = time.strftime("%d %B")
+
+
+def create_keys():
+    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+    btn1 = types.KeyboardButton('♈ Овен')
+    btn2 = types.KeyboardButton('♉ Телец')
+    btn3 = types.KeyboardButton('♊ Близнецы')
+    btn4 = types.KeyboardButton('♋ Рак')
+    btn5 = types.KeyboardButton('♌ Лев')
+    btn6 = types.KeyboardButton('♍ Дева')
+    btn7 = types.KeyboardButton('♎ Весы')
+    btn8 = types.KeyboardButton('♏ Скорпион')
+    btn9 = types.KeyboardButton('♐ Стрелец')
+    btn10 = types.KeyboardButton('♑ Козерог')
+    btn11 = types.KeyboardButton('♒ Водолей')
+    btn12 = types.KeyboardButton('♓ Рыбы')
+    # for z in znak:
+    #     btn = types.KeyboardButton(znak.keys())
+    #     markup.add(btn)
+    markup.add(btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btn10, btn11, btn12, )
+    return markup
 
 
 @bot.message_handler(commands=['start'])
@@ -78,21 +100,13 @@ def get_goroscope(message):
         print(datetime.now())
         print(message.text)
         print(f"id: {who_was.user.id} ---- имя: {who_was.user.first_name} ---- никнейм: {who_was.user.username}")
-
     except:
-        bot.send_message(message.chat.id, f"""Ууупс... что то пошло не так... во всем виноваты иллюминаты и бури на 
-        солнце... не нажать ли <b>/start </b>?
+
+        bot.send_message(message.chat.id, f"""Ууупс... что то пошло не так... во всем виноваты иллюминаты и бури на солнце
+        ... не нажать ли <b>/start </b>?
         
                   ... <b>или кнопку со своим знаком зодиака</b>...""", parse_mode='html')
         print('---------------\nex: ' + message.text + '\n---------------')
-
-
-def create_keys():
-    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    for z in znak:
-        btn = types.KeyboardButton(znak.keys())
-        markup.add(btn)
-    return markup
 
 
 # запуск функции по расписанию
@@ -103,6 +117,6 @@ def starter():
 
 
 if __name__ == '__main__':
-    # t2 = threading.Thread(target=starter)  # запуск ф-ии starter в отдельном потоке
-    # t2.start()
+    t2 = threading.Thread(target=starter)  # запуск ф-ии starter в отдельном потоке
+    t2.start()
     bot.polling(non_stop=True)
