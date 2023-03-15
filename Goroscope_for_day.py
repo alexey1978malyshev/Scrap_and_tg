@@ -10,8 +10,12 @@ import threading
 from threading import Thread
 
 URL = 'https://maykop.retrofm.ru/'
+
 URL1 = 'https://www.forbes.ru/forbeslife/dosug/262327-na-vse-vremena-100-vdokhnovlyayushchikh-tsitat'
-API_KEY = '6044839241:AAG9Xp704t2E73B79jPprVap-Fq_t6vt5T4'
+
+
+API_KEY = '*****************************************'
+
 
 # session = requests.Session()                      вариант постоянного соединения
 # adapter = requests.adapters.HTTPAdapter(
