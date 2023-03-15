@@ -10,8 +10,8 @@ import threading
 from threading import Thread
 
 URL = 'https://maykop.retrofm.ru/'
+URL1 = 'https://www.forbes.ru/forbeslife/dosug/262327-na-vse-vremena-100-vdokhnovlyayushchikh-tsitat'
 API_KEY = '6044839241:AAG9Xp704t2E73B79jPprVap-Fq_t6vt5T4'
-
 
 # session = requests.Session()                      вариант постоянного соединения
 # adapter = requests.adapters.HTTPAdapter(
@@ -22,21 +22,32 @@ API_KEY = '6044839241:AAG9Xp704t2E73B79jPprVap-Fq_t6vt5T4'
 # r = requests.get(URL)
 # soup = b(r.text, 'lxml')
 
-def request_url(url):
-    request = requests.get(URL)  # запрос содержимого страницы сайта
-    global soup
-    soup = b(request.text, 'lxml')  # создание объекта bs4
-    return soup
-
-
-request_url(URL)
-
-all_zodiac_info = soup.find(class_="index_horoscope_list").find_all('div')
 zodiac_info_list = []
-znak = {}
 
-for item in all_zodiac_info:
-    zodiac_info_list.append(item.text)
+
+def request_url(url, url1):
+    request = requests.get(URL)
+    request_1 = requests.get(URL1)  # запрос содержимого страницы сайта
+    # global soup, soup1
+    soup = b(request.text, 'lxml')  # создание объекта bs4
+    soup1 = b(request_1.text, 'lxml')  # создание объекта bs4
+    print(datetime.now())
+    print(f"{request.status_code} : 'гороскоп'")
+    print(f"{request_1.status_code} : 'цитаты'")
+
+    # return soup, soup1
+    def do_lists():
+        all_zodiac_info = soup.find(class_="index_horoscope_list").find_all('div')
+        all_quotes = soup1.find(class_="")
+
+        for item in all_zodiac_info:
+            zodiac_info_list.append(item.text)
+        # return zodiac_info_list
+
+    do_lists()
+
+
+request_url(URL, URL1)
 
 # print(title.text)
 # print(r.text )# получение HTML кода
@@ -48,8 +59,9 @@ bot = telebot.TeleBot(API_KEY)
 date = time.strftime("%d %B")
 
 
-def create_keys():
+def create_goroscope_keys():
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+
     btn1 = types.KeyboardButton('♈ Овен')
     btn2 = types.KeyboardButton('♉ Телец')
     btn3 = types.KeyboardButton('♊ Близнецы')
@@ -62,17 +74,25 @@ def create_keys():
     btn10 = types.KeyboardButton('♑ Козерог')
     btn11 = types.KeyboardButton('♒ Водолей')
     btn12 = types.KeyboardButton('♓ Рыбы')
-    # for z in znak:
-    #     btn = types.KeyboardButton(znak.keys())
+    # for z in znak_btn:                    #добавление кнопки в цикле(не работает)
+    #     btn = types.KeyboardButton(z)
     #     markup.add(btn)
-    markup.add(btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btn10, btn11, btn12, )
+    markup.add(btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btn10, btn11, btn12)
+
+    return markup
+
+
+def create_quotes_keys():
+    markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+    btn1 = types.KeyboardButton('Цитата на день. Жми!')
+    markup.add(btn1)
     return markup
 
 
 @bot.message_handler(commands=['start'])
 def hello(message):
     bot.send_message(message.chat.id, 'Привет! Чтобы получить гороскоп нажми на свой знак зодиака: ',
-                     reply_markup=create_keys())
+                     reply_markup=create_goroscope_keys())
 
 
 @bot.message_handler(content_types=['text'])
@@ -92,10 +112,17 @@ def get_goroscope(message):
         '♒ Водолей': zodiac_info_list[10],
         '♓ Рыбы': zodiac_info_list[11]
     }
+    # znak_btn = []
+    # for z in znak.keys():
+    #     znak_btn.append(z)
+    #     print(znak_btn)
     # input_message = message.text.lower()
 
+
     try:
-        bot.send_message(message.chat.id, znak[message.text], reply_markup=create_keys())
+        bot.send_message(message.chat.id, znak[message.text], reply_markup=create_goroscope_keys())
+
+
         who_was = bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id)
         print(datetime.now())
         print(message.text)
@@ -109,14 +136,20 @@ def get_goroscope(message):
         print('---------------\nex: ' + message.text + '\n---------------')
 
 
+# TODO добавить продолжение диагога и предложение свежего анекдота или цитаты дня
+
+
 # запуск функции по расписанию
 def starter():
-    schedule.every().day.at('00:01').do(request_url(URL))
+    schedule.every().day.at('00:01').do(request_url, URL, URL1)
+    print('soup refreshed')
     while True:
         schedule.run_pending()
+        time.sleep(1)
 
 
 if __name__ == '__main__':
     t2 = threading.Thread(target=starter)  # запуск ф-ии starter в отдельном потоке
     t2.start()
+
     bot.polling(non_stop=True)
