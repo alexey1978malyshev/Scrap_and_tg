@@ -1,3 +1,5 @@
+from os.path import join, abspath, dirname
+
 import requests
 import lxml
 from bs4 import BeautifulSoup as b
@@ -14,7 +16,7 @@ URL = 'https://maykop.retrofm.ru/'
 URL1 = 'https://www.forbes.ru/forbeslife/dosug/262327-na-vse-vremena-100-vdokhnovlyayushchikh-tsitat'
 
 
-API_KEY = '*****************************************'
+API_KEY = '6044839241:AAG9Xp704t2E73B79jPprVap-Fq_t6vt5T4'
 
 
 # session = requests.Session()                      вариант постоянного соединения
@@ -131,6 +133,10 @@ def get_goroscope(message):
         print(datetime.now())
         print(message.text)
         print(f"id: {who_was.user.id} ---- имя: {who_was.user.first_name} ---- никнейм: {who_was.user.username}")
+        MAIN_DIR = abspath(dirname(__file__))
+        full_name = join(MAIN_DIR, 'bots_users.txt')
+        with open(full_name, mode='a', encoding='utf-8') as file:
+            file.write(f"{datetime.now()} - {message.text} - id: {who_was.user.id} ---- имя: {who_was.user.first_name} ---- никнейм: {who_was.user.username}\n")
     except:
 
         bot.send_message(message.chat.id, f"""Ууупс... что то пошло не так... во всем виноваты иллюминаты и бури на солнце
